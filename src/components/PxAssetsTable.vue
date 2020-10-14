@@ -23,13 +23,31 @@
           <img class="w-6 h-6" :src="`https://static.coincap.io/assets/icons/${a.symbol.toLowerCase()}@2x.png`" :alt="a.name">
         </td>
         <td><b># {{ a.rank }}</b></td>
-        <td>{{ a.name }}</td>
+
+        <td>
+          <router-link 
+          class="hover:underline text-green-600"
+          :to="{ 
+            name: 'coin-detail',
+            params: {
+              id: a.id
+            }
+          }">{{ a.name }}</router-link>
+          <small class="ml-1 text-gray-500">
+            {{ a.symbol }}
+          </small>
+        </td>
+
         <td>{{ dollar(a.priceUsd) }}</td>
         <td>{{ dollar(a.marketCapUsd) }}</td>
         <td :class="a.changePercent24Hr.includes('-') ? 'text-red-600' : 'text-green-600'">
           {{ percent(a.changePercent24Hr) }}
           </td>
-        <td class="hidden sm:block"></td>
+        <td class="hidden sm:block">
+          <px-button @click="goToCoin(a.id)">
+            <span>Detalle</span>
+          </px-button>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -38,9 +56,14 @@
 <script>
 
 import { dollarFilter, percentFilter } from "@/filters";
+import PxButton from "@/components/PxButton";
 
 export default {
   name: "PxAssetsTable",
+
+  components: {
+    PxButton
+  },
 
   props: {
     // Cuando definimos valores default para un array o un objeto, tenemos que definir una fuinción que devuelva un array o un objeto respectivamente
@@ -51,6 +74,14 @@ export default {
   },
 
   methods: {
+
+    // También podemos hacer las navegaciones de esta forma
+    goToCoin(id) {
+      this.$router.push({
+        name:"coin-detail",
+        params: { id }
+      });
+    },
 
     dollar(value) {
       return dollarFilter(value);
