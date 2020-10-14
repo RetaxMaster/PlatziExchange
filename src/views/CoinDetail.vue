@@ -1,10 +1,16 @@
 <template>
   <div class="flex-col">
-    <template>
+      <!-- Este template forma parte de la explicación de los slots, practicamente es para que si no existe el id que no se muestre nada de html, si estuviera en un div si se mostraria solo el div -->
+    <template v-if="asset.id">
       <div class="flex flex-col sm:flex-row justify-around items-center">
         <div class="flex flex-col items-center">
-          <img class="w-20 h-20 mr-5" />
+          <img 
+          :src="`https://static.coincap.io/assets/icons/${asset.symbol.toLowerCase()}@2x.png`"
+          class="w-20 h-20 mr-5"
+          :alt="asset.name"
+          />
           <h1 class="text-5xl">
+              {{ asset.name }}
             <small class="sm:mr-2 text-gray-500">{{ asset.symbol }}</small>
           </h1>
         </div>
@@ -13,27 +19,27 @@
           <ul>
             <li class="flex justify-between">
               <b class="text-gray-600 mr-10 uppercase">Ranking</b>
-              <span></span>
+              <span>#{{ asset.rank }}</span>
             </li>
             <li class="flex justify-between">
               <b class="text-gray-600 mr-10 uppercase">Precio actual</b>
-              <span></span>
+              <span>{{ dollar(asset.priceUsd) }}</span>
             </li>
             <li class="flex justify-between">
               <b class="text-gray-600 mr-10 uppercase">Precio más bajo</b>
-              <span></span>
+              <span>{{ asset.rank }}</span>
             </li>
             <li class="flex justify-between">
               <b class="text-gray-600 mr-10 uppercase">Precio más alto</b>
-              <span></span>
+              <span>{{ asset.rank }}</span>
             </li>
             <li class="flex justify-between">
               <b class="text-gray-600 mr-10 uppercase">Precio Promedio</b>
-              <span></span>
+              <span>{{ asset.rank }}</span>
             </li>
             <li class="flex justify-between">
               <b class="text-gray-600 mr-10 uppercase">Variación 24hs</b>
-              <span></span>
+              <span>{{ percent( asset.changePercent24Hr) }}</span>
             </li>
           </ul>
         </div>
@@ -62,7 +68,44 @@
 
 <script>
 
+import api from "@/api";
+import { dollarFilter, percentFilter } from "@/filters";
+
 export default {
+
+
+    name: "CoinDetail",
+
+    data() {
+        return {
+            asset: {}
+        }
+    },
+
+    created() {
+        // Llama al metodo getCoin
+        this.getCoin();
+    },
+
+    methods: {
+
+        getCoin() {
+
+            const id = this.$route.params.id;
+            api.getAsset(id)
+            .then(asset => (this.asset = asset))
+
+        },
+
+        dollar(value) {
+            return dollarFilter(value);
+        },
+
+        percent(value) {
+            return percentFilter(value);
+        }
+
+    }
     
 }
 
