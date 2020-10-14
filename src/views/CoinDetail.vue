@@ -27,15 +27,15 @@
             </li>
             <li class="flex justify-between">
               <b class="text-gray-600 mr-10 uppercase">Precio más bajo</b>
-              <span>{{ asset.rank }}</span>
+              <span>{{ dollar(min) }}</span>
             </li>
             <li class="flex justify-between">
               <b class="text-gray-600 mr-10 uppercase">Precio más alto</b>
-              <span>{{ asset.rank }}</span>
+              <span>{{ dollar(max) }}</span>
             </li>
             <li class="flex justify-between">
               <b class="text-gray-600 mr-10 uppercase">Precio Promedio</b>
-              <span>{{ asset.rank }}</span>
+              <span>{{ dollar(avg) }}</span>
             </li>
             <li class="flex justify-between">
               <b class="text-gray-600 mr-10 uppercase">Variación 24hs</b>
@@ -78,7 +78,8 @@ export default {
 
     data() {
         return {
-            asset: {}
+            asset: {},
+            history: []
         }
     },
 
@@ -92,8 +93,16 @@ export default {
         getCoin() {
 
             const id = this.$route.params.id;
-            api.getAsset(id)
-            .then(asset => (this.asset = asset))
+
+            Promise.all([
+              api.getAsset(id),
+              api.getAssetHistory(id)
+            ])
+            .then(([asset, history]) => {
+              this.asset = asset;
+              this.history = history;
+            });
+
 
         },
 
@@ -104,6 +113,31 @@ export default {
         percent(value) {
             return percentFilter(value);
         }
+
+    },
+
+    computed: {
+
+
+      min() {
+
+        return Math.min(
+          ...this.history.map(h => parseFloat(h.priceUsd).toFixed(2))
+        );
+
+      },
+
+      max() {
+
+        return Math.max(
+          ...this.history.map(h => parseFloat(h.priceUsd).toFixed(2))
+        );
+
+      },
+
+      avg() {
+        return (this.history.reduce((a, b) => a + parseFloat(b.priceUsd), 0) / this.history.length).toFixed(2)
+      }
 
     }
     
