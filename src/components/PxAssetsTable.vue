@@ -14,7 +14,9 @@
       </tr>
     </thead>
     <tbody>
-      <tr class="border-b border-gray-200 hover:bg-gray-100 hover:bg-orange-100">
+      <tr
+        class="border-b border-gray-200 hover:bg-gray-100 hover:bg-orange-100"
+      >
         <td></td>
         <td></td>
         <td></td>
@@ -29,19 +31,15 @@
 
 <script>
 export default {
-
   name: "PxAssetsTable",
 
   props: {
-
     // Cuando definimos valores default para un array o un objeto, tenemos que definir una fuinción que devuelva un array o un objeto respectivamente
     assets: {
       type: Array,
       default: () => []
     }
-
   }
-
 };
 </script>
 
