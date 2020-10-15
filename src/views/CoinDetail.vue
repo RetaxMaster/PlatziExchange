@@ -63,6 +63,27 @@
         </div>
       </div>
 
+      <h3 class="text-xl my-10">Mejores Ofertas de Cambio</h3>
+      <table>
+        <tr v-for="m in markets" :key="`${m.exchange}-${m.priceUsd}`" class="border-b">
+          <td>
+            <b>{{ m.exchangeId }}</b>
+          </td>
+          <td>{{ dollar(m.priceUsd) }}</td>
+          <td>{{ m.baseSymbol }} / {{ m.quoteSymbol }}</td>
+          <td>
+
+            <px-button
+            v-if="!m.url"
+            @click="getWebsite(m)">
+              <p v-if="m.isLoading || false">Cargando...</p>
+              <slot v-else>Obtener Link</slot>
+            </px-button>
+            <a v-else class="hover:underline text-green-600" target="_blanck">{{ m.url }}</a>
+          </td>
+        </tr>
+      </table>
+
     </template>
   </div>
 </template>
@@ -70,6 +91,7 @@
 <script>
 
 import api from "@/api";
+import PxButton from "@/components/PxButton";
 import { dollarFilter, percentFilter } from "@/filters";
 
 export default {
@@ -77,10 +99,15 @@ export default {
 
     name: "CoinDetail",
 
+    components: {
+      PxButton
+    },
+
     data() {
         return {
             asset: {},
-            history: []
+            history: [],
+            markets: []
         }
     },
 
@@ -91,17 +118,32 @@ export default {
 
     methods: {
 
+        getWebsite(exchange) {
+
+          exchange.isLoading = true;
+          
+          return api.getExchange(exchange.exchangeId).
+            then(res => {
+              exchange.url = res.exchangeUrl
+
+              // Los problemas de reactividad solo los podemos tener en objetos o arrays y solamente cuando queremos agregar propiedades que no existen desde el principio, que es cuando Vue no las tarckea (Aunque al parecer se arreglo en Vue 3)
+
+            }).finally(() => exchange.isLoading = false);
+        },
+
         getCoin() {
 
             const id = this.$route.params.id;
 
             Promise.all([
               api.getAsset(id),
-              api.getAssetHistory(id)
+              api.getAssetHistory(id),
+              api.getMarkets(id)
             ])
-            .then(([asset, history]) => {
+            .then(([asset, history, markets]) => {
               this.asset = asset;
               this.history = history;
+              this.markets = markets;
             });
 
 
