@@ -1,7 +1,8 @@
 <template>
     <div>
+        
         <!-- v-bind: puede ser reemplazado por ":" -->
-        <px-assets-table :assets="assets" />
+        <px-assets-table v-show="!isLoading" :assets="assets" />
     </div>
 </template>
 
@@ -19,14 +20,17 @@ export default {
 
     data() {
         return {
-            assets: []
+            assets: [],
+            isLoading: false
         }
     },
 
     created() {
 
+        this.isLoading = true;
         api.getAssets()
             .then(assets => (this.assets = assets))
+            .finally(() => this.isLoading = false);
 
     }
 
