@@ -3,19 +3,27 @@
     <thead>
       <tr class="bg-gray-100 border-b-2 border-gray-400">
         <th></th>
-        <th>
-          <span>Ranking</span>
+        <th :class="{ up: sortOrder === 1, down: sortOrder === -1 }">
+          <span class="underline cursor-pointer" @click="changeSortOrder">Ranking</span>
         </th>
         <th>Nombre</th>
         <th>Precio</th>
         <th>Cap. de Mercado</th>
         <th>Variación 24hs</th>
-        <td class="hidden sm:block"></td>
+        <td class="hidden sm:block">
+          <input
+            class="bg-gray-100 focus:outline-none border-b border-gray-400 py-2 px-4 block w-full appearance-none leading-normal"
+            id="filter"
+            placeholder="Buscar..."
+            type="text"
+            v-model="filter"
+          />
+        </td>
       </tr>
     </thead>
     <tbody>
       <tr
-        v-for="a in assets"
+        v-for="a in filteredAssets"
         :key="a.id"
         class="border-b border-gray-200 hover:bg-gray-100 hover:bg-orange-100"
       >
@@ -65,12 +73,43 @@ export default {
     PxButton
   },
 
+  data() {
+    return {
+      filter: "",
+      sortOrder: 1
+    }
+  },
+
   props: {
     // Cuando definimos valores default para un array o un objeto, tenemos que definir una fuinción que devuelva un array o un objeto respectivamente
     assets: {
       type: Array,
       default: () => []
     }
+  },
+
+  computed: {
+
+    filteredAssets() {
+
+      const altOrder = this.sortOrder === 1 ? -1 : 1;
+
+      return this.assets.filter(a =>
+        a.symbol.toLowerCase().includes(this.filter.toLowerCase()) ||
+        a.name.toLowerCase().includes(this.filter.toLowerCase())
+      )
+      .sort((a, b) => {
+        
+        if (parseInt(a.rank) > parseInt(b.rank)) {
+          return this.sortOrder;
+        }
+
+        return altOrder;
+
+      });
+
+    }
+
   },
 
   methods: {
@@ -81,6 +120,10 @@ export default {
         name:"coin-detail",
         params: { id }
       });
+    },
+
+    changeSortOrder() {
+      this.sortOrder = this.sortOrder === 1 ? -1 : 1;
     },
 
     dollar(value) {
